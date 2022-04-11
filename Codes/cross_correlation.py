@@ -10,11 +10,11 @@ from statsmodels.tsa import stattools
 # https://towardsdatascience.com/computing-cross-correlation-between-geophysical-time-series-488642be7bf0
 
 # Have some time series data (via pandas)
-station1 = 'Molteno'
-variable1 = '9084_1'
-station2 = 'Molteno'
-variable2 = '9106_4'
-values = 200
+station1 = 'Lesmo'
+variable1 = '8120_1'
+station2 = 'Caslino'
+variable2 = '8124_1'
+values = 20000
 
 data1 = pd.read_csv('../joined_data/'+station1+'/'+variable1+'.csv').values[0:values,-1]
 data2 = pd.read_csv('../joined_data/'+station2+'/'+variable2+'.csv').values[0:values,-1]
