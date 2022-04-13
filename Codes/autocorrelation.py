@@ -4,8 +4,8 @@ from statsmodels.graphics.tsaplots import plot_acf
 
 ## https://www.alpharithms.com/autocorrelation-time-series-python-432909/
 
-station = 'Lesmo/'
-variable = '8120_1'
+station = 'Costa/'
+variable = '8148_1'
 
 # Have some time series data (via pandas)
 data = pd.read_csv('../joined_data/'+station+variable+'.csv')

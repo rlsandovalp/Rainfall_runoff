@@ -8,9 +8,7 @@ anticipation = 7
 target_variable = ['Lesmo', '8120_1']
 
 precipitation_list = [1,2,3,4,5,6,7,8,9,10]
-for i in range(anticipation-1):
-    if i+1 in precipitation_list:
-        precipitation_list.remove(i+1)
+for i in range(anticipation-1): precipitation_list.remove(i+1)
 
 train_variables = [['Lesmo', '8120_1', [0+anticipation,1+anticipation]],
                   ['Costa', '8148_1', [0+anticipation,1+anticipation]],

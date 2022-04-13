@@ -8,8 +8,8 @@ from statsmodels.tsa import stattools
 # https://towardsdatascience.com/computing-cross-correlation-between-geophysical-time-series-488642be7bf0
 
 # Have some time series data (via pandas)
-station = 'Lesmo'
-variable = '8120_1'
+station = 'Costa'
+variable = '8148_1'
 data1 = pd.read_csv('../joined_data/'+station+'/'+variable+'.csv').values[0:20000,-1]
 
 # Select relevant data, index by Date
