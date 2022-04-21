@@ -95,8 +95,11 @@ plt.legend()
 # plt.text(0.03, 10, 'MAPE = ' + str('%.2f' % mape(Yp, Y_test)) + '%')
 # plt.text(0.03, 5, 'NSE = ' + str('%.2f' % nse(Yp, Y_test)))
 
+A = (Y_test-Yp)/Y_test
+A[Y_test<100] = 0
+
 plt.subplot(a,b,2)
-plt.plot(Y_test-Yp, 'r-', label = 'error')
+plt.plot(A, 'r-', label = 'Y_pr - Y_obs')
 plt.ylabel('h [cm]')
 plt.xlabel('Time [hours]')
 plt.legend()

@@ -29,7 +29,7 @@ anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(2000, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.Dense(1))
     return model
@@ -64,7 +64,7 @@ X = []
 Y = []
 
 for i in range (window+anticipation,training_size):
-    if X_train[i,0]> -0.15:
+    if Y_train[i-1] > -0.1:
         X.append(X_train[i-window-anticipation:i-anticipation,:])
         Y.append(Y_train[i-1])
 
@@ -85,14 +85,15 @@ model.summary()
 #             # COMPILE MODEL
 # ########################################
 
+
 model.compile(loss = 'mean_squared_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 10)
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 20)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 100, validation_data=(X_test, Y_test), callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 2000, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
