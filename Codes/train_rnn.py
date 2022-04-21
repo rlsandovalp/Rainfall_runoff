@@ -23,15 +23,13 @@ target_variable = ['Costa', '8148_1']
             # DEFINE THE MODEL
 ########################################
 
-window = 24
+window = 8
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(50, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(12, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
-    # model.add(tf.keras.layers.LSTM(30))
-    # model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.Dense(1))
     return model
 
@@ -40,7 +38,7 @@ def make_model():
 ########################################
 
 starting_point = 0
-training_size = 50000
+training_size = 57000
 
 X_train = np.zeros((training_size, len(training_variables)))
 Y_train = np.zeros(training_size)
@@ -54,8 +52,9 @@ X = []
 Y = []
 
 for i in range (window+anticipation,training_size):
-    X.append(X_train[i-window-anticipation:i-anticipation,:])
-    Y.append(Y_train[i-1])
+    if Y_train[i-1] > 0:
+        X.append(X_train[i-window-anticipation:i-anticipation,:])
+        Y.append(Y_train[i-1])
 
 X_train, Y_train = np.array(X), np.array(Y)
 
@@ -79,7 +78,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', mode = 'min', verb
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 200, callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 50, callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
