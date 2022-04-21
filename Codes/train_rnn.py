@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 import tensorflow as tf
 import time
 from functions_ML import *
@@ -28,7 +29,7 @@ anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(200, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(50, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
     # model.add(tf.keras.layers.LSTM(30))
     # model.add(tf.keras.layers.Dropout(0.2))
@@ -72,6 +73,8 @@ for i in range (window+anticipation,training_size):
 X_train, Y_train = np.array(X), np.array(Y)
 
 Y_train = np.reshape(Y_train, (len(Y_train), 1))
+
+X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size=0.25)
 ########################################
             # CREATE THE MODEL
 ########################################
@@ -84,22 +87,23 @@ model.summary()
 #             # COMPILE MODEL
 # ########################################
 
-model.compile(loss = 'mean_absolute_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', mode = 'min', verbose = 1, patience = 10)
+model.compile(loss = 'mean_squared_error', optimizer = 'adam', metrics = ['accuracy'])
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 10)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 200, callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 200, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
-plt.plot(history.history['loss'])
+plt.plot(history.history['loss'], label = 'train')
+plt.plot(history.history['val_loss'], label = 'validation')
 plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
-plt.semilogx()
+plt.legend()
 plt.show()
 
 model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
