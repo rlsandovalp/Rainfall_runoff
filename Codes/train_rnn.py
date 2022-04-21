@@ -24,12 +24,12 @@ target_variable =  ['Costa', '8148_1', 'h [cm]']
             # DEFINE THE MODEL
 ########################################
 
-window = 80
+window = 4
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(12, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.Dense(1))
     return model
@@ -72,7 +72,7 @@ X_train, Y_train = np.array(X), np.array(Y)
 
 Y_train = np.reshape(Y_train, (len(Y_train), 1))
 
-X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size=0.25)
+X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size = 0.25)
 ########################################
             # CREATE THE MODEL
 ########################################
@@ -92,7 +92,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', 
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 200, validation_data=(X_test, Y_test), callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 100, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
@@ -101,6 +101,7 @@ plt.plot(history.history['val_loss'], label = 'validation')
 plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
+plt.semilogy()
 plt.legend()
 plt.show()
 
