@@ -8,22 +8,18 @@ from functions_ML import *
             # DEFINE THE VARIABLES
 ########################################
 
-training_variables = [['Costa', '8148_1'],
-                    ['Molteno', '9084_1'],
-                    ['Caslino', '8124_1'],
-                    ['Molteno', '9106_4'],
-                    ['Caslino', '8122_4'],
-                    ['Canzo', '2614_4'],
-                    ['Erba', '5870_4'],
-                    ['Lambrugo', '8197_4']]
+training_variables = [['Molteno', '9084_1'],
+                  ['Molteno', '9106_4'],
+                  ['Molteno', '9017_1'],
+                  ['Molteno', '11020_1']]
 
-target_variable = ['Costa', '8148_1']
+target_variable = ['Molteno', '9084_1']
 
 ########################################
             # DEFINE THE MODEL
 ########################################
 
-window = 24
+window = 8
 anticipation = 1
 
 def make_model():
@@ -50,6 +46,17 @@ for num, variable in enumerate(training_variables):
 
 Y_train = pd.read_csv('../joined_data/'+target_variable[0]+'/'+target_variable[1]+'.csv').values[starting_point:starting_point+training_size,-1]
 
+X_train_min = np.min(X_train, axis = 0)
+X_train_max = np.max(X_train, axis = 0)
+X_train = (X_train-X_train_min)/(X_train_max-X_train_min)-0.5
+
+Y_train_min = np.min(Y_train, axis = 0)
+Y_train_max = np.max(Y_train, axis = 0)
+Y_train = (Y_train-Y_train_min)/(Y_train_max-Y_train_min)-0.5
+
+np.savetxt('../Models/X_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [X_train_min, X_train_max])
+np.savetxt('../Models/Y_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [Y_train_min, Y_train_max])
+
 X = []
 Y = []
 
@@ -73,13 +80,13 @@ model.summary()
 # ########################################
 
 model.compile(loss = 'mean_absolute_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', mode = 'min', verbose = 1, patience = 20)
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', mode = 'min', verbose = 1, patience = 10)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 200, callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 50, callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
@@ -89,4 +96,4 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.show()
 
-model.save('rnn_model_wf_ant1.h5')
+model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
