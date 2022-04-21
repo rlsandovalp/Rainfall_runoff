@@ -4,27 +4,31 @@ import tensorflow as tf
 import time
 from functions_ML import *
 
-########################################
-            # DEFINE THE VARIABLES
-########################################
+#############################################
+##########  DANTE  ########################
+#############################################
 
-training_variables = [['Molteno', '9084_1'],
-                  ['Molteno', '9106_4'],
-                  ['Molteno', '9017_1'],
-                  ['Molteno', '11020_1']]
+training_variables = [['Costa', '8148_1', 'h [cm]'],
+                  ['Molteno', '9084_1', 'h [cm]'],
+                  ['Caslino', '8124_1', 'h [cm]'],
+                  ['Molteno', '9106_4', 'P [mm]'],
+                  ['Caslino', '8122_4', 'P [mm]'],
+                  ['Canzo', '2614_4', 'P [mm]'],
+                  ['Erba', '5870_4', 'P [mm]'],
+                  ['Lambrugo', '8197_4', 'P [mm]']]
 
-target_variable = ['Molteno', '9084_1']
+target_variable =  ['Costa', '8148_1', 'h [cm]']
 
 ########################################
             # DEFINE THE MODEL
 ########################################
 
-window = 8
+window = 80
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(50, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(200, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
     # model.add(tf.keras.layers.LSTM(30))
     # model.add(tf.keras.layers.Dropout(0.2))
@@ -36,7 +40,7 @@ def make_model():
 ########################################
 
 starting_point = 0
-training_size = 50000
+training_size = 55000
 
 X_train = np.zeros((training_size, len(training_variables)))
 Y_train = np.zeros(training_size)
@@ -61,8 +65,9 @@ X = []
 Y = []
 
 for i in range (window+anticipation,training_size):
-    X.append(X_train[i-window-anticipation:i-anticipation,:])
-    Y.append(Y_train[i-1])
+    if X_train[i,0]> -0.15:
+        X.append(X_train[i-window-anticipation:i-anticipation,:])
+        Y.append(Y_train[i-1])
 
 X_train, Y_train = np.array(X), np.array(Y)
 
@@ -86,7 +91,7 @@ callback = tf.keras.callbacks.EarlyStopping(monitor = 'loss', mode = 'min', verb
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 50, callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1000, epochs = 200, callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
@@ -94,6 +99,7 @@ plt.plot(history.history['loss'])
 plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
+plt.semilogx()
 plt.show()
 
 model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')

@@ -3,19 +3,25 @@ import pandas as pd
 from sklearn.impute import KNNImputer
 import os
 
-station = 'Molteno/'
-variables = ['9084_1', '9106_4', '9017_1', '11020_1']
-
-folder = '../raw_data/'+station
+variables = [['Costa', '8148_1', 'h [cm]'],
+            ['Molteno', '9084_1', 'h [cm]'],
+            ['Caslino', '8124_1', 'h [cm]'],
+            ['Molteno', '9106_4', 'P [mm]'],
+            ['Caslino', '8122_4', 'P [mm]'],
+            ['Canzo', '2614_4', 'P [mm]'],
+            ['Erba', '5870_4', 'P [mm]'],
+            ['Lambrugo', '8197_4', 'P [mm]']]
 
 imputer = KNNImputer(n_neighbors=2, weights="uniform", missing_values=-999)
 
 for variable in variables:
+    folder = '../raw_data/'+variable[0]+'/'
+    code_variable = variable[1]
     for file in os.listdir(folder):
-        if file.endswith(variable):
+        if file.endswith(code_variable+'.csv'):
             print('-'*50)
             source = folder+file
-            output = '../processed_data/'+station+file
+            output = '../processed_data/'+variable[0]+'/'+file
             print(file)
 
             Y = pd.read_csv(source)

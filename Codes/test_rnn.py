@@ -4,17 +4,34 @@ import tensorflow as tf
 from functions_ML import *
 
 
-window = 8
+window = 80
 anticipation = 1
 
+# #############################################
+# ##########  MOLTENO  ########################
+# #############################################
 
+# training_variables = [['Molteno', '9084_1', 'h [cm]'],
+#                   ['Molteno', '9106_4', 'P [mm]'],
+#                   ['Molteno', '9017_1', 'T [C]'],
+#                   ['Molteno', '11020_1', 'RH [%]']]
 
-training_variables = [['Molteno', '9084_1', 'Q [cms]'],
+# target_variable = ['Molteno', '9084_1', 'Q [cms]']
+
+#############################################
+##########  DANTE  ########################
+#############################################
+
+training_variables = [['Costa', '8148_1', 'h [cm]'],
+                  ['Molteno', '9084_1', 'h [cm]'],
+                  ['Caslino', '8124_1', 'h [cm]'],
                   ['Molteno', '9106_4', 'P [mm]'],
-                  ['Molteno', '9017_1', 'T [C]'],
-                  ['Molteno', '11020_1', 'RH [%]']]
+                  ['Caslino', '8122_4', 'P [mm]'],
+                  ['Canzo', '2614_4', 'P [mm]'],
+                  ['Erba', '5870_4', 'P [mm]'],
+                  ['Lambrugo', '8197_4', 'P [mm]']]
 
-target_variable = ['Molteno', '9084_1', 'Q [cms]']
+target_variable =  ['Costa', '8148_1', 'h [cm]']
 
 model = model = tf.keras.models.load_model('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
 
@@ -50,7 +67,6 @@ for i in range (window+anticipation,testing_size+1):
     X.append(X_test[i-window-anticipation:i-anticipation,:])
     Y.append(Y_test[i-1])
 
-
 ## TUTTO E UN CASINO!!
 X_test, Y_test = np.array(X), np.array(Y)
 
@@ -62,39 +78,34 @@ Y_test = np.concatenate((np.zeros(window),Y_test))
 
 plt.figure(figsize = (10,6))
 
-plt.subplot(3,3,1)
-plt.plot(Yp, 'r-', label = 'LSTM')
-plt.plot(Y_test, 'b-', label = 'Measured')
-plt.ylabel('Flowrate [cms]')
+total = len(training_variables)+2
+
+if total < 10:
+    a = 3
+    b = 3
+else:
+    a = 3
+    b = 4
+
+plt.subplot(a,b,1)
+plt.plot(Yp, '.', label = 'LSTM')
+plt.plot(Y_test, '.', label = 'Measured')
+plt.ylabel('h level [cm]')
 plt.legend()
-plt.text(0.03, 10, 'MAPE = ' + str('%.2f' % mape(Yp, Y_test)) + '%')
-plt.text(0.03, 5, 'NSE = ' + str('%.2f' % nse(Yp, Y_test)))
+# plt.text(0.03, 10, 'MAPE = ' + str('%.2f' % mape(Yp, Y_test)) + '%')
+# plt.text(0.03, 5, 'NSE = ' + str('%.2f' % nse(Yp, Y_test)))
 
-plt.subplot(3,3,2)
-plt.plot(X_test_2[:,0], label = 'Level [cm]')
-plt.xlabel('Time [hours]')
-plt.ylabel('q [cm]')
-plt.legend()
-
-plt.subplot(3,3,3)
-plt.bar(np.linspace(0,1000,1000), X_test_2[:,1], width = 0.8)
-plt.xlabel('Time [hours]')
-plt.ylabel('P [mm]')
-
-plt.subplot(3,3,4)
-plt.plot(X_test_2[:,2])
-plt.xlabel('Time [hours]')
-plt.ylabel('T [C]')
-
-plt.subplot(3,3,5)
-plt.plot(X_test_2[:,3])
-plt.xlabel('Time [hours]')
-plt.ylabel('RH [%]')
-
-plt.subplot(3,3,6)
-plt.plot(Y_test-Yp, 'r-', label = 'LSTM')
-plt.ylabel('Flowrate difference [cms]')
+plt.subplot(a,b,2)
+plt.plot(Y_test-Yp, 'r-', label = 'error')
+plt.ylabel('h [cm]')
 plt.xlabel('Time [hours]')
 plt.legend()
+
+for n_var, variable in enumerate(training_variables):
+    plt.subplot(a,b,n_var+3)
+    plt.plot(X_test_2[:,n_var], label = training_variables[n_var][0] + ' ' + training_variables[n_var][1])
+    plt.xlabel('Time [hours]')
+    plt.ylabel(training_variables[n_var][2])
+    plt.legend()
 
 plt.show()
