@@ -4,7 +4,7 @@ import tensorflow as tf
 from functions_ML import *
 
 
-window = 4
+window = 10
 anticipation = 1
 
 # #############################################
@@ -24,11 +24,17 @@ anticipation = 1
 
 training_variables = [['Costa', '8148_1', 'h [cm]'],
                   ['Molteno', '9084_1', 'h [cm]'],
-                  ['Caslino', '8124_1', 'h [cm]'],
+                  ['Molteno', '9017_1', 'T [C]'],
                   ['Molteno', '9106_4', 'P [mm]'],
+                  ['Molteno', '11020_1', 'HR [%]'],
                   ['Caslino', '8122_4', 'P [mm]'],
+                  ['Caslino', '8123_1', 'T [C]'],
+                  ['Caslino', '8124_1', 'h [cm]'],
                   ['Canzo', '2614_4', 'P [mm]'],
+                  ['Erba', '6163_1', 'RH [%]'],
+                  ['Erba', '5871_1', 'T [C]'],
                   ['Erba', '5870_4', 'P [mm]'],
+                  ['Lambrugo', '8198_1', 'T [C]'],
                   ['Lambrugo', '8197_4', 'P [mm]']]
 
 target_variable =  ['Costa', '8148_1', 'h [cm]']
@@ -76,15 +82,18 @@ Yp = np.concatenate((np.zeros(window),np.reshape(Yp, -1)))
 Y_test = (Y_test+0.5)*(Y_train_max-Y_train_min)+Y_train_min
 Y_test = np.concatenate((np.zeros(window),Y_test))
 
-plt.figure(figsize = (10,6))
+plt.figure(figsize = (15,10))
 
 total = len(training_variables)+2
 
 if total < 10:
     a = 3
     b = 3
-else:
+elif total < 12:
     a = 3
+    b = 4
+else:
+    a = 4
     b = 4
 
 plt.subplot(a,b,1)
