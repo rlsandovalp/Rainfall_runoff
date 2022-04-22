@@ -30,12 +30,12 @@ target_variable =  ['Costa', '8148_1', 'h [cm]']
             # DEFINE THE MODEL
 ########################################
 
-window = 10
+window = 5
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(1000, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.Dense(1))
     return model

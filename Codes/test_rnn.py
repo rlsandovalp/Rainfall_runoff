@@ -4,7 +4,7 @@ import tensorflow as tf
 from functions_ML import *
 
 
-window = 10
+window = 5
 anticipation = 1
 
 # #############################################

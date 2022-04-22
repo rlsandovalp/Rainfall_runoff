@@ -39,15 +39,20 @@ def plot_scatter(Y_predicted, Y_test, pl_min, pl_max):
     plt.yscale('log')
     plt.show()
 
-def organize_input_data(train_variables, target_variable, max_dt, starting_point, training_size, testing_size):
+def organize_input_data(training_variables, target_variable, max_dt, starting_point, training_size, testing_size, anticipation, window):
+
     X_train = []
     Y_train = []
     X_test = []
     Y_test = []
-    for station in train_variables:
-        for dt in station[2]:
-            X_train.append(pd.read_csv('../joined_data/'+station[0]+'/'+station[1]+'.csv').values[starting_point+(max_dt-dt):starting_point+training_size+(max_dt-dt),-1])
-            X_test.append(pd.read_csv('../joined_data/'+station[0]+'/'+station[1]+'.csv').values[starting_point+training_size+(max_dt-dt):starting_point+training_size+testing_size+(max_dt-dt),-1])
+
+    window_list = []
+    for i in range(anticipation, window+1): window_list.append(i)
+
+    for variable in training_variables:
+        for dt in window_list:
+            X_train.append(pd.read_csv('../joined_data/'+variable[0]+'/'+variable[1]+'.csv').values[starting_point+(max_dt-dt):starting_point+training_size+(max_dt-dt),-1])
+            X_test.append(pd.read_csv('../joined_data/'+variable[0]+'/'+variable[1]+'.csv').values[starting_point+training_size+(max_dt-dt):starting_point+training_size+testing_size+(max_dt-dt),-1])
 
     X_train = np.transpose(np.array(X_train))
     X_test = np.transpose(np.array(X_test))
@@ -62,7 +67,7 @@ def pred_bootstrapping(cycles_train, realizations, X, Y, X_test):
     w = []
     b = []
 
-    lin_reg = LinearRegression(n_jobs = 1)
+    lin_reg = LinearRegression(n_jobs = 10)
     for i in range(cycles_train):
         X_train, _, Y_train, _ = train_test_split(X, Y, test_size=0.25)
         reg = lin_reg.fit(X_train, Y_train)
@@ -86,7 +91,7 @@ def pred_bootstrapping(cycles_train, realizations, X, Y, X_test):
 
 def pred_max_lik(realizations, X, Y, X_test):
 
-    lin_reg = LinearRegression(n_jobs = 1)
+    lin_reg = LinearRegression(n_jobs = 10)
     reg = lin_reg.fit(X, Y)
     w = reg.coef_
     b = reg.intercept_
