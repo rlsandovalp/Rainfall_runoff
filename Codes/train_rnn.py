@@ -5,39 +5,37 @@ import tensorflow as tf
 import time
 from functions_ML import *
 
-#############################################
-##########  DANTE  ########################
-#############################################
+target_variable = ['Lesmo', '8120_1']
 
-training_variables = [['Costa', '8148_1', 'h [cm]'],
+training_variables = [['Lesmo', '8120_1', 'h [cm]'],
+                  ['Costa', '8148_1', 'h [cm]'],
                   ['Molteno', '9084_1', 'h [cm]'],
-                  ['Molteno', '9017_1', 'T [C]'],
+                #   ['Molteno', '9017_1', 'T [C]'],
                   ['Molteno', '9106_4', 'P [mm]'],
-                  ['Molteno', '11020_1', 'HR [%]'],
-                  ['Caslino', '8122_4', 'P [mm]'],
-                  ['Caslino', '8123_1', 'T [C]'],
+                #   ['Molteno', '11020_1', 'HR [%]'],
                   ['Caslino', '8124_1', 'h [cm]'],
+                #   ['Caslino', '8123_1', 'T [C]'],
+                  ['Caslino', '8122_4', 'P [mm]'],
                   ['Canzo', '2614_4', 'P [mm]'],
-                  ['Erba', '6163_1', 'RH [%]'],
-                  ['Erba', '5871_1', 'T [C]'],
+                #   ['Erba', '5871_1', 'T [C]'],
                   ['Erba', '5870_4', 'P [mm]'],
-                  ['Lambrugo', '8198_1', 'T [C]'],
-                  ['Lambrugo', '8197_4', 'P [mm]']]
-
-target_variable =  ['Costa', '8148_1', 'h [cm]']
+                #   ['Erba', '6163_1', 'RH [%]'],
+                #   ['Lambrugo', '8198_1', 'T [C]'],
+                  ['Lambrugo', '8197_4', 'P [mm]'],
+                  ['Casatenovo', '2385_4', 'P [mm]']]
 
 ########################################
             # DEFINE THE MODEL
 ########################################
 
-window = 5
+window = 8
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(1000, input_shape = (window, len(training_variables))))
-    model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.Dense(1))
+    model.add(tf.keras.layers.LSTM(12, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.Dropout(0.3))
+    model.add(tf.keras.layers.Dense(1, activation = 'relu'))
     return model
 
 ########################################
@@ -45,7 +43,7 @@ def make_model():
 ########################################
 
 starting_point = 0
-training_size = 55000
+training_size = 50000
 
 X_train = np.zeros((training_size, len(training_variables)))
 Y_train = np.zeros(training_size)
@@ -93,13 +91,13 @@ model.summary()
 
 
 model.compile(loss = 'mean_squared_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 20)
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 3000)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 3000, epochs = 2000, verbose = 2, validation_data=(X_test, Y_test), callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, verbose = 2, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
