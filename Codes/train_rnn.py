@@ -8,6 +8,7 @@ from functions_ML import *
 target_variable = ['Lesmo', '8120_1']
 
 training_variables = [['Lesmo', '8120_1', 'h [cm]'],
+<<<<<<< HEAD
                     ['Costa', '8148_1', 'h [cm]'],
                     ['Molteno', '9084_1', 'h [cm]'],
                     ['Molteno', '9106_4', 'P [mm]'],
@@ -18,19 +19,30 @@ training_variables = [['Lesmo', '8120_1', 'h [cm]'],
                     ['Erba', '5870_4', 'P [mm]'],
                     ['Lambrugo', '8197_4', 'P [mm]'],
                     ['Casatenovo', '2385_4', 'P [mm]']]
+=======
+                  ['Costa', '8148_1', 'h [cm]'],
+                  ['Molteno', '9084_1', 'h [cm]'],
+                  ['Molteno', '9106_4', 'P [mm]'],
+                  ['Caslino', '8124_1', 'h [cm]'],
+                  ['Caslino', '8122_4', 'P [mm]'],
+                  ['Canzo', '2614_4', 'P [mm]'],
+                  ['Erba', '5870_4', 'P [mm]'],
+                  ['Lambrugo', '8197_4', 'P [mm]'],
+                  ['Casatenovo', '2385_4', 'P [mm]']]
+>>>>>>> 73766c4358d1ac07d5e108cd249c328a23059f09
 
 ########################################
             # DEFINE THE MODEL
 ########################################
 
-window = 8
+window = 24
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(12, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.3))
-    model.add(tf.keras.layers.Dense(1, activation = 'relu'))
+    model.add(tf.keras.layers.Dense(1))
     return model
 
 ########################################
@@ -63,9 +75,9 @@ X = []
 Y = []
 
 for i in range (window+anticipation,training_size):
-    if Y_train[i-1] > -0.1:
-        X.append(X_train[i-window-anticipation:i-anticipation,:])
-        Y.append(Y_train[i-1])
+    # if Y_train[i-1] > -0.1:
+    X.append(X_train[i-window-anticipation:i-anticipation,:])
+    Y.append(Y_train[i-1])
 
 X_train, Y_train = np.array(X), np.array(Y)
 
@@ -84,15 +96,15 @@ model.summary()
 #             # COMPILE MODEL
 # ########################################
 
-
-model.compile(loss = 'mean_squared_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 3000)
+opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+model.compile(loss = 'mean_squared_error', optimizer = opt, metrics = ['accuracy'])
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 400)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, verbose = 2, validation_data=(X_test, Y_test), callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
@@ -105,4 +117,4 @@ plt.semilogy()
 plt.legend()
 plt.show()
 
-model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
+model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_.h5')
