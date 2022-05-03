@@ -4,7 +4,7 @@ import tensorflow as tf
 from functions_ML import *
 
 
-window = 5
+window = 24
 anticipation = 1
 
 # #############################################
@@ -22,22 +22,24 @@ anticipation = 1
 ##########  DANTE  ########################
 #############################################
 
-training_variables = [['Costa', '8148_1', 'h [cm]'],
-                  ['Molteno', '9084_1', 'h [cm]'],
-                  ['Molteno', '9017_1', 'T [C]'],
-                  ['Molteno', '9106_4', 'P [mm]'],
-                  ['Molteno', '11020_1', 'HR [%]'],
-                  ['Caslino', '8122_4', 'P [mm]'],
-                  ['Caslino', '8123_1', 'T [C]'],
-                  ['Caslino', '8124_1', 'h [cm]'],
-                  ['Canzo', '2614_4', 'P [mm]'],
-                  ['Erba', '6163_1', 'RH [%]'],
-                  ['Erba', '5871_1', 'T [C]'],
-                  ['Erba', '5870_4', 'P [mm]'],
-                  ['Lambrugo', '8198_1', 'T [C]'],
-                  ['Lambrugo', '8197_4', 'P [mm]']]
+target_variable = ['Lesmo', '8120_1']
 
-target_variable =  ['Costa', '8148_1', 'h [cm]']
+training_variables = [['Lesmo', '8120_1', 'h [cm]'],
+                  ['Costa', '8148_1', 'h [cm]'],
+                  ['Molteno', '9084_1', 'h [cm]'],
+                #   ['Molteno', '9017_1', 'T [C]'],
+                  ['Molteno', '9106_4', 'P [mm]'],
+                #   ['Molteno', '11020_1', 'HR [%]'],
+                  ['Caslino', '8124_1', 'h [cm]'],
+                #   ['Caslino', '8123_1', 'T [C]'],
+                  ['Caslino', '8122_4', 'P [mm]'],
+                  ['Canzo', '2614_4', 'P [mm]'],
+                #   ['Erba', '5871_1', 'T [C]'],
+                  ['Erba', '5870_4', 'P [mm]'],
+                #   ['Erba', '6163_1', 'RH [%]'],
+                #   ['Lambrugo', '8198_1', 'T [C]'],
+                  ['Lambrugo', '8197_4', 'P [mm]'],
+                  ['Casatenovo', '2385_4', 'P [mm]']]
 
 model = model = tf.keras.models.load_model('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
 
@@ -105,7 +107,7 @@ plt.legend()
 # plt.text(0.03, 5, 'NSE = ' + str('%.2f' % nse(Yp, Y_test)))
 
 A = (Y_test-Yp)/Y_test
-A[Y_test<100] = 0
+A[Y_test<60] = 0
 
 plt.subplot(a,b,2)
 plt.plot(A, 'r-', label = 'Y_pr - Y_obs')

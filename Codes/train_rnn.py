@@ -10,17 +10,11 @@ target_variable = ['Lesmo', '8120_1']
 training_variables = [['Lesmo', '8120_1', 'h [cm]'],
                   ['Costa', '8148_1', 'h [cm]'],
                   ['Molteno', '9084_1', 'h [cm]'],
-                #   ['Molteno', '9017_1', 'T [C]'],
                   ['Molteno', '9106_4', 'P [mm]'],
-                #   ['Molteno', '11020_1', 'HR [%]'],
                   ['Caslino', '8124_1', 'h [cm]'],
-                #   ['Caslino', '8123_1', 'T [C]'],
                   ['Caslino', '8122_4', 'P [mm]'],
                   ['Canzo', '2614_4', 'P [mm]'],
-                #   ['Erba', '5871_1', 'T [C]'],
                   ['Erba', '5870_4', 'P [mm]'],
-                #   ['Erba', '6163_1', 'RH [%]'],
-                #   ['Lambrugo', '8198_1', 'T [C]'],
                   ['Lambrugo', '8197_4', 'P [mm]'],
                   ['Casatenovo', '2385_4', 'P [mm]']]
 
@@ -28,14 +22,14 @@ training_variables = [['Lesmo', '8120_1', 'h [cm]'],
             # DEFINE THE MODEL
 ########################################
 
-window = 8
+window = 24
 anticipation = 1
 
 def make_model():
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(12, input_shape = (window, len(training_variables))))
+    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
     model.add(tf.keras.layers.Dropout(0.3))
-    model.add(tf.keras.layers.Dense(1, activation = 'relu'))
+    model.add(tf.keras.layers.Dense(1))
     return model
 
 ########################################
@@ -43,7 +37,7 @@ def make_model():
 ########################################
 
 starting_point = 0
-training_size = 50000
+training_size = 70128
 
 X_train = np.zeros((training_size, len(training_variables)))
 Y_train = np.zeros(training_size)
@@ -68,15 +62,15 @@ X = []
 Y = []
 
 for i in range (window+anticipation,training_size):
-    if Y_train[i-1] > -0.1:
-        X.append(X_train[i-window-anticipation:i-anticipation,:])
-        Y.append(Y_train[i-1])
+    # if Y_train[i-1] > -0.1:
+    X.append(X_train[i-window-anticipation:i-anticipation,:])
+    Y.append(Y_train[i-1])
 
 X_train, Y_train = np.array(X), np.array(Y)
 
 Y_train = np.reshape(Y_train, (len(Y_train), 1))
 
-X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size = 0.25)
+X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size = 0.125)
 ########################################
             # CREATE THE MODEL
 ########################################
@@ -89,15 +83,15 @@ model.summary()
 #             # COMPILE MODEL
 # ########################################
 
-
-model.compile(loss = 'mean_squared_error', optimizer = 'adam', metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', verbose = 0, patience = 3000)
+opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+model.compile(loss = 'mean_squared_error', optimizer = opt, metrics = ['accuracy'])
+callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 400)
 
 ########################################
             # FIT THE MODEL
 ########################################
 t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, verbose = 2, validation_data=(X_test, Y_test), callbacks = [callback])
+history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, validation_data=(X_test, Y_test), callbacks = [callback])
 t1 = time.time()
 print('Runtime: %.2f s' % (t1-t0))
 
@@ -110,4 +104,4 @@ plt.semilogy()
 plt.legend()
 plt.show()
 
-model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.h5')
+model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_.h5')
