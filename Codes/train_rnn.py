@@ -8,7 +8,6 @@ from functions_ML import *
 target_variable = ['Lesmo', '8120_1']
 
 training_variables = [['Lesmo', '8120_1', 'h [cm]'],
-<<<<<<< HEAD
                     ['Costa', '8148_1', 'h [cm]'],
                     ['Molteno', '9084_1', 'h [cm]'],
                     ['Molteno', '9106_4', 'P [mm]'],
@@ -19,17 +18,6 @@ training_variables = [['Lesmo', '8120_1', 'h [cm]'],
                     ['Erba', '5870_4', 'P [mm]'],
                     ['Lambrugo', '8197_4', 'P [mm]'],
                     ['Casatenovo', '2385_4', 'P [mm]']]
-=======
-                  ['Costa', '8148_1', 'h [cm]'],
-                  ['Molteno', '9084_1', 'h [cm]'],
-                  ['Molteno', '9106_4', 'P [mm]'],
-                  ['Caslino', '8124_1', 'h [cm]'],
-                  ['Caslino', '8122_4', 'P [mm]'],
-                  ['Canzo', '2614_4', 'P [mm]'],
-                  ['Erba', '5870_4', 'P [mm]'],
-                  ['Lambrugo', '8197_4', 'P [mm]'],
-                  ['Casatenovo', '2385_4', 'P [mm]']]
->>>>>>> 73766c4358d1ac07d5e108cd249c328a23059f09
 
 ########################################
             # DEFINE THE MODEL
