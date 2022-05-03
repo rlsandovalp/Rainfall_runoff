@@ -23,86 +23,95 @@ training_variables = [['Lesmo', '8120_1', 'h [cm]'],
             # DEFINE THE MODEL
 ########################################
 
-window = 24
-anticipation = 1
+Dropouts = [0.2, 0.5]
+Windows = [6]
+Cells = [64]
+LRs = [1E-3]
 
-def make_model():
-    model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.LSTM(500, input_shape = (window, len(training_variables))))
-    model.add(tf.keras.layers.Dropout(0.3))
-    model.add(tf.keras.layers.Dense(1))
-    return model
+for dropout in Dropouts:
+    for window in Windows:
+        for cell in Cells:
+            for lr in LRs:
 
-########################################
-            # READ THE DATA
-########################################
+                anticipation = 1
 
-starting_point = 0
-training_size = 70128
+                def make_model():
+                    model = tf.keras.models.Sequential()
+                    model.add(tf.keras.layers.LSTM(cell, input_shape = (window, len(training_variables))))
+                    model.add(tf.keras.layers.Dropout(dropout))
+                    model.add(tf.keras.layers.Dense(1))
+                    return model
 
-X_train = np.zeros((training_size, len(training_variables)))
-Y_train = np.zeros(training_size)
+                ########################################
+                            # READ THE DATA
+                ########################################
 
-for num, variable in enumerate(training_variables):
-    X_train[:,num] = pd.read_csv('../joined_data/'+variable[0]+'/'+variable[1]+'.csv').values[starting_point:starting_point+training_size,-1]
+                starting_point = 0
+                training_size = 70128
 
-Y_train = pd.read_csv('../joined_data/'+target_variable[0]+'/'+target_variable[1]+'.csv').values[starting_point:starting_point+training_size,-1]
+                X_train = np.zeros((training_size, len(training_variables)))
+                Y_train = np.zeros(training_size)
 
-X_train_min = np.min(X_train, axis = 0)
-X_train_max = np.max(X_train, axis = 0)
-X_train = (X_train-X_train_min)/(X_train_max-X_train_min)-0.5
+                for num, variable in enumerate(training_variables):
+                    X_train[:,num] = pd.read_csv('../joined_data/'+variable[0]+'/'+variable[1]+'.csv').values[starting_point:starting_point+training_size,-1]
 
-Y_train_min = np.min(Y_train, axis = 0)
-Y_train_max = np.max(Y_train, axis = 0)
-Y_train = (Y_train-Y_train_min)/(Y_train_max-Y_train_min)-0.5
+                Y_train = pd.read_csv('../joined_data/'+target_variable[0]+'/'+target_variable[1]+'.csv').values[starting_point:starting_point+training_size,-1]
 
-np.savetxt('../Models/X_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [X_train_min, X_train_max])
-np.savetxt('../Models/Y_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [Y_train_min, Y_train_max])
+                X_train_min = np.min(X_train, axis = 0)
+                X_train_max = np.max(X_train, axis = 0)
+                X_train = (X_train-X_train_min)/(X_train_max-X_train_min)-0.5
 
-X = []
-Y = []
+                Y_train_min = np.min(Y_train, axis = 0)
+                Y_train_max = np.max(Y_train, axis = 0)
+                Y_train = (Y_train-Y_train_min)/(Y_train_max-Y_train_min)-0.5
 
-for i in range (window+anticipation,training_size):
-    # if Y_train[i-1] > -0.1:
-    X.append(X_train[i-window-anticipation:i-anticipation,:])
-    Y.append(Y_train[i-1])
+                np.savetxt('../Models/X_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [X_train_min, X_train_max])
+                np.savetxt('../Models/Y_lim_model_wf_ant'+str(anticipation)+'_'+target_variable[0]+'.txt', [Y_train_min, Y_train_max])
 
-X_train, Y_train = np.array(X), np.array(Y)
+                X = []
+                Y = []
 
-Y_train = np.reshape(Y_train, (len(Y_train), 1))
+                for i in range (window+anticipation,training_size):
+                    # if Y_train[i-1] > -0.1:
+                    X.append(X_train[i-window-anticipation:i-anticipation,:])
+                    Y.append(Y_train[i-1])
 
-X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size = 0.125)
-########################################
-            # CREATE THE MODEL
-########################################
+                X_train, Y_train = np.array(X), np.array(Y)
 
-s = tf.keras.backend.clear_session()
-model = make_model()
-model.summary()
+                Y_train = np.reshape(Y_train, (len(Y_train), 1))
 
-# ########################################
-#             # COMPILE MODEL
-# ########################################
+                X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size = 0.125)
+                ########################################
+                            # CREATE THE MODEL
+                ########################################
 
-opt = tf.keras.optimizers.Adam(learning_rate=0.001)
-model.compile(loss = 'mean_squared_error', optimizer = opt, metrics = ['accuracy'])
-callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 400)
+                s = tf.keras.backend.clear_session()
+                model = make_model()
+                model.summary()
 
-########################################
-            # FIT THE MODEL
-########################################
-t0 = time.time()
-history = model.fit(X_train, Y_train, batch_size = 1250, epochs = 3000, validation_data=(X_test, Y_test), callbacks = [callback])
-t1 = time.time()
-print('Runtime: %.2f s' % (t1-t0))
+                # ########################################
+                #             # COMPILE MODEL
+                # ########################################
 
-plt.plot(history.history['loss'], label = 'train')
-plt.plot(history.history['val_loss'], label = 'validation')
-plt.title('Model loss')
-plt.ylabel('Loss')
-plt.xlabel('Epoch')
-plt.semilogy()
-plt.legend()
-plt.show()
+                opt = tf.keras.optimizers.Adam(learning_rate = lr)
+                model.compile(loss = 'mean_squared_error', optimizer = opt, metrics = ['accuracy'])
+                callback = tf.keras.callbacks.EarlyStopping(monitor = 'val_loss', mode = 'min', patience = 400)
 
-model.save('../Models/rnn_model_wf_ant'+str(anticipation)+'_.h5')
+                ########################################
+                            # FIT THE MODEL
+                ########################################
+                t0 = time.time()
+                history = model.fit(X_train, Y_train, batch_size = 2048, epochs = 1, validation_data=(X_test, Y_test), callbacks = [callback])
+                t1 = time.time()
+                print('Runtime: %.2f s' % (t1-t0))
+
+                plt.plot(history.history['loss'], label = 'train')
+                plt.plot(history.history['val_loss'], label = 'validation')
+                plt.title('Model loss')
+                plt.ylabel('Loss')
+                plt.xlabel('Epoch')
+                plt.semilogy()
+                plt.legend()
+                plt.show()
+
+                model.save('../Models/rnn_l1_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.h5')
