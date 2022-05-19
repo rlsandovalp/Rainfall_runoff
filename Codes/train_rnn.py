@@ -23,9 +23,9 @@ training_variables = [['Lesmo', '8120_1', 'h [cm]'],
             # DEFINE THE MODEL
 ########################################
 
-Dropouts = [0.2, 0.5]
+Dropouts = [0.5]
 Windows = [6, 24, 48]
-Cells = [64, 128, 256]
+Cells = [256]
 LRs = [1E-3, 5E-4]
 
 for dropout in Dropouts:
@@ -37,6 +37,8 @@ for dropout in Dropouts:
 
                 def make_model():
                     model = tf.keras.models.Sequential()
+                    model.add(tf.keras.layers.LSTM(cell, return_sequences=True, input_shape = (window, len(training_variables))))
+                    model.add(tf.keras.layers.Dropout(dropout))
                     model.add(tf.keras.layers.LSTM(cell, input_shape = (window, len(training_variables))))
                     model.add(tf.keras.layers.Dropout(dropout))
                     model.add(tf.keras.layers.Dense(1))
@@ -65,8 +67,8 @@ for dropout in Dropouts:
                 Y_train_max = np.max(Y_train, axis = 0)
                 Y_train = (Y_train-Y_train_min)/(Y_train_max-Y_train_min)-0.5
 
-                np.savetxt('../Models/X_lim_l1_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.txt', [X_train_min, X_train_max])
-                np.savetxt('../Models/Y_lim_l1_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.txt', [Y_train_min, Y_train_max])
+                np.savetxt('../Models/X_lim_l2_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.txt', [X_train_min, X_train_max])
+                np.savetxt('../Models/Y_lim_l2_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.txt', [Y_train_min, Y_train_max])
 
                 X = []
                 Y = []
@@ -101,17 +103,20 @@ for dropout in Dropouts:
                             # FIT THE MODEL
                 ########################################
                 t0 = time.time()
-                history = model.fit(X_train, Y_train, batch_size = 2048, epochs = 2, validation_data=(X_test, Y_test), callbacks = [callback])
+                history = model.fit(X_train, Y_train, batch_size = 2048, epochs = 3000, validation_data=(X_test, Y_test), callbacks = [callback])
                 t1 = time.time()
                 print('Runtime: %.2f s' % (t1-t0))
-
+                
+                plt.clf()
                 plt.plot(history.history['loss'], label = 'train')
                 plt.plot(history.history['val_loss'], label = 'validation')
                 plt.title('Model loss')
+                plt.ylim(1E-5, 1E-2)
                 plt.ylabel('Loss')
+                plt.xlim(0, 3000)
                 plt.xlabel('Epoch')
                 plt.semilogy()
                 plt.legend()
-                plt.savefig('../Models/Figures/l1_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.png')
+                plt.savefig('../Models/Figures/l2_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.png')
 
-                model.save('../Models/rnn_l1_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.h5')
+                model.save('../Models/rnn_l2_d'+str(dropout)+'_w'+str(window)+'_c'+str(cell)+'_l'+str(lr)+'_'+'.h5')
