@@ -10,6 +10,9 @@ def nse(Y_predicted, Y_test):
 def mape(Y_predicted, Y_test):
     return 100*(abs(Y_test-Y_predicted)/Y_test).mean()
 
+def mae(Y_predicted, Y_test):
+    return (abs(Y_test-Y_predicted)).mean()
+
 def plot_hydrograph(Y_predicted, Y_test):
     fig = plt.figure(dpi = 200)
     ax = fig.add_subplot(111)
